@@ -53,7 +53,7 @@ std::vector<std::pair<int, int>> handleTable(char* table, int& row, int& column)
 
 	for(int xter=0; xter != row; ++xter){
 		for(int yter=0; yter != column; ++yter){
-			std::array<int, 5> remainPossiblePos{ 0, 1, 2, 3, 4 };
+			std::array<int, 4> remainPossiblePos{ 0, 1, 2, 3 };
 			if(xter == 0){
 				/* possiblePos[3] = std::make_pair(0, 0); */
 				remainPossiblePos[3] = 4;
@@ -74,19 +74,22 @@ std::vector<std::pair<int, int>> handleTable(char* table, int& row, int& column)
 			switch(*(table + (yter*column) + xter)){
 				case 'B':
 					for(const auto& pos : remainPossiblePos){
-						xter += possiblePos[pos].first; 
-						yter += possiblePos[pos].second;
-						switch(*(table + (yter*column) + xter)){
-							case 'G':
-								/* goodPersonLocation.push_back(std::make_pair(-1, -1)); */
-								std::cout << "No" << std::endl;
-								break;
-							case '.':
-								*(table + (yter*column) + xter) = '#';
-							default:
-								break;
+						if(pos != 4){
+							int posX = xter + possiblePos[pos].first; 
+							int posY = yter + possiblePos[pos].second;
+							switch(*(table + (posY*column) + posX)){
+								case 'G':
+									/* goodPersonLocation.push_back(std::make_pair(-1, -1)); */
+									std::cout << "No" << std::endl;
+									break;
+								case '.':
+									*(table + (posY*column) + posX) = '#';
+								default:
+									break;
+							}
+						} else {
+							continue;
 						}
-
 					}
 				case 'G':
 					goodPersonLocation.push_back(std::make_pair(xter, yter));

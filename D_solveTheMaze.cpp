@@ -3,6 +3,9 @@
 #include<memory>
 #include <utility>
 #include <array>
+#include <set>
+#include <deque>
+#include <algorithm>
 
 char* handleInput(int& row, int& column) {
 
@@ -41,7 +44,7 @@ void checkOuput(char* table, int& row, int& column){
 /* }; */
 
 
-std::vector<std::pair<int, int>> handleTable(char* table, int& row, int& column){
+std::deque<std::pair<int, int>> handleTable(char* table, int& row, int& column){
 	std::vector<std::pair<int, int>> possiblePos = { 
 		std::make_pair(0, 1),
 		std::make_pair(1, 0),
@@ -49,7 +52,7 @@ std::vector<std::pair<int, int>> handleTable(char* table, int& row, int& column)
 		std::make_pair(-1, 0),
 		std::make_pair(0, 0)
 	};
-	std::vector<std::pair<int, int>> goodPersonLocation;
+	std::deque<std::pair<int, int>> goodPersonLocation;
 
 	for(int xter=0; xter != row; ++xter){
 		for(int yter=0; yter != column; ++yter){
@@ -102,6 +105,56 @@ std::vector<std::pair<int, int>> handleTable(char* table, int& row, int& column)
 	return goodPersonLocation;
 }
 
+void bruteForceTheArray(char* table, std::deque<std::pair<int, int>>& goodPersonLocation, int& row, int& column){
+
+	std::set<int> remainPossiblePos;
+	bool TrueOrFalse = true;
+	while((goodPersonLocation.begin() != goodPersonLocation.end()) && TrueOrFalse){
+		auto location = goodPersonLocation.begin();
+		int posX = location->first;
+		int posY = location->second;
+
+		if(*(table + (posY * column) + posX) == '.')
+			goodPersonLocation.pop_front();
+		else{
+			while(posY != row){
+
+				while(*(table + (posY * column) + posX) != '#'){
+					remainPossiblePos.insert(posX);
+					if(++posX == column)
+						break;
+				}
+
+				while(*(table + (posY * column) + posX) != '#'){
+					remainPossiblePos.insert(posX);
+					if(--posX == -1)
+						break;
+				}
+
+				for(auto& position: remainPossiblePos){
+					switch (*(table + ((location->second + 1) * column) + position)){
+						case 'G':
+							*(table + ((location->second + 1) * column) + position) = '.';
+						case '#':
+							remainPossiblePos.erase(position);
+					}
+				}
+			}
+			goodPersonLocation.pop_front();
+			if((posY == row) && (std::find(remainPossiblePos.cbegin(), remainPossiblePos.cend(), column) != remainPossiblePos.cend()))
+				continue;
+			else{
+				TrueOrFalse = false;
+				break;
+			}
+
+			++posY;
+		}
+
+	}
+	std::cout << (TrueOrFalse ? "Yes" : "No" ) << std::endl;
+}
+
 int main(int argc, const char* argv[]){
 	int test; // number of text case
 	std::cin >> test;
@@ -115,6 +168,7 @@ int main(int argc, const char* argv[]){
 		checkOuput(table, row, column);
 		auto goodPersonLocation = handleTable(table, row, column);
 		checkOuput(table, row, column);
+		bruteForceTheArray(table, goodPersonLocation, row, column);
 
 	}
 }
